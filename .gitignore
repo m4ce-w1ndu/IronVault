@@ -1,0 +1,217 @@
+# .NET build artifacts
+bin/
+obj/
+out/
+build/
+publish/
+
+# Native AOT outputs
+*.aot
+*.native
+*.so
+*.dylib
+*.dll
+*.exe
+*.exe.mdb
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.cache
+*.vs/
+*.vscode/
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+[Bb]in/
+[Oo]bj/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+*.htmlcov
+.coverage
+*.coverdata
+
+# Coverage reports
+coverage/
+coverage.json
+*.lcov
+*.gcov
+*.gcda
+*.gcno
+
+# Dotnet tools
+.dotnet/
+dotnet-tools.json
+.tools/
+
+# Platform specific
+*.pidb
+*.ilk
+*.pdb
+*.iobj
+*.ipdb
+
+# Linux / macOS
+.DS_Store
+__pycache__/
+*.py[cod]
+*.so.dSYM/
+*.dSYM/
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment files
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~
+~$*
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# IDE specific
+*.code-workspace
+*.slnf
+launch.json
+tasks.json
+
+# Certificates
+*.pfx
+*.p12
+*.cer
+*.crt
+*.key
+
+# Distribution
+*.nupkg
+*.msi
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+*.7z
+*.appx
+*.appxbundle
+
+# Publish profiles
+Properties/PublishProfiles/
+*.pubxml.user
+
+# Benchmark results
+BenchmarkDotNet.Artifacts/
+benchmarks/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Profiling
+*.vsp
+*.psess
+*.sap
+*.nettrace
+
+# Native AOT specific
+*.il
+*.obj
+*.exp
+*.lib
+*.map
+*.p7b
+*.pgd
+
+# Avalonia specific
+*.xbf
+*.g.cs
+*.i.cs
+
+# GitHub Actions (if any)
+.github/workflows/*.key
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Local build scripts (except version controlled ones)
+*.local.ps1
+*.local.sh
+*.local.bat
+
+# Documentation build (if you add docs later)
+docs/_build/
+docs/api/
+site/
+
+# User secrets
+*.secrets.json
+*Secrets.config
+*.keyfile
+*.snk
+
+# Crash reports
+crashlytics/
+*.crash
+*.dmp
+
+# OpenCover
+*.opencover.xml
+
+# Code Climate
+.codeclimate.yml
+
+# StyleCop
+StyleCopReport.xml
