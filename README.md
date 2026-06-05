@@ -174,7 +174,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## 📝 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+GPL2 License - see [LICENSE](LICENSE) for details.
 
 ---
 
