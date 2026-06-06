@@ -69,10 +69,16 @@
 
     <Window.Styles>
         <!-- Hide native title bar icon and text when extending client area -->
-        <Style Selector="WindowDrawnDecorations /template/ Image#PART_Icon">
+        <Style Selector="WindowDrawnDecorations /template/ Control#PART_Icon">
             <Setter Property="IsVisible" Value="False" />
         </Style>
-        <Style Selector="WindowDrawnDecorations /template/ TextBlock#PART_TitleText">
+        <Style Selector="WindowDrawnDecorations /template/ Control#PART_TitleTextPanel">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="Window /template/ Control#PART_Icon">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="Window /template/ Control#PART_TitleText">
             <Setter Property="IsVisible" Value="False" />
         </Style>
 
