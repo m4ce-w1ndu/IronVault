@@ -15,7 +15,16 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            var vaultService = new IronVault.Core.Services.MockVaultService();
+            var vm = new ViewModels.MainWindowViewModel(vaultService);
+            var mainWindow = new MainWindow
+            {
+                DataContext = vm
+            };
+            
+            mainWindow.Closed += (sender, e) => desktop.Shutdown();
+            
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();
