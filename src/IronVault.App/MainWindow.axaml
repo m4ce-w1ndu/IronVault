@@ -2,8 +2,814 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:IronVault.App.ViewModels"
+        xmlns:models="using:IronVault.Core.Models"
+        mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="650"
+        Width="950" Height="650"
+        MinWidth="900" MinHeight="580"
         x:Class="IronVault.App.MainWindow"
-        Title="IronVault.App">
-    Welcome to Avalonia!
+        x:DataType="vm:MainWindowViewModel"
+        x:CompileBindings="True"
+        Title="IronVault"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Background="Transparent"
+        FontFamily="Segoe UI, Inter, -apple-system, BlinkMacSystemFont, Roboto, sans-serif">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <!-- Platform-Agnostic Nordic Slate Theme (Nord Palette) -->
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SidebarBackground" Color="#E5E9F0"/>
+                    <SolidColorBrush x:Key="ContentBackground" Color="#ECEFF4"/>
+                    <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="CardBorder" Color="#D8DEE9"/>
+                    <SolidColorBrush x:Key="TextPrimary" Color="#2E3440"/>
+                    <SolidColorBrush x:Key="TextSecondary" Color="#4C566A"/>
+                    <SolidColorBrush x:Key="SidebarSelectionBackground" Color="#D8DEE9"/>
+                    <SolidColorBrush x:Key="SidebarSelectionIndicator" Color="#5E81AC"/>
+                    <SolidColorBrush x:Key="DividerLine" Color="#E5E9F0"/>
+                    <SolidColorBrush x:Key="ControlBorder" Color="#D8DEE9"/>
+                    <SolidColorBrush x:Key="InputBackground" Color="#FFFFFF"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SidebarBackground" Color="#242933"/>
+                    <SolidColorBrush x:Key="ContentBackground" Color="#2E3440"/>
+                    <SolidColorBrush x:Key="CardBackground" Color="#3B4252"/>
+                    <SolidColorBrush x:Key="CardBorder" Color="#434C5E"/>
+                    <SolidColorBrush x:Key="TextPrimary" Color="#ECEFF4"/>
+                    <SolidColorBrush x:Key="TextSecondary" Color="#D8DEE9"/>
+                    <SolidColorBrush x:Key="SidebarSelectionBackground" Color="#434C5E"/>
+                    <SolidColorBrush x:Key="SidebarSelectionIndicator" Color="#88C0D0"/>
+                    <SolidColorBrush x:Key="DividerLine" Color="#4C566A"/>
+                    <SolidColorBrush x:Key="ControlBorder" Color="#4C566A"/>
+                    <SolidColorBrush x:Key="InputBackground" Color="#2E3440"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="SidebarBackground" Color="#242933"/>
+                    <SolidColorBrush x:Key="ContentBackground" Color="#2E3440"/>
+                    <SolidColorBrush x:Key="CardBackground" Color="#3B4252"/>
+                    <SolidColorBrush x:Key="CardBorder" Color="#434C5E"/>
+                    <SolidColorBrush x:Key="TextPrimary" Color="#ECEFF4"/>
+                    <SolidColorBrush x:Key="TextSecondary" Color="#D8DEE9"/>
+                    <SolidColorBrush x:Key="SidebarSelectionBackground" Color="#434C5E"/>
+                    <SolidColorBrush x:Key="SidebarSelectionIndicator" Color="#88C0D0"/>
+                    <SolidColorBrush x:Key="DividerLine" Color="#4C566A"/>
+                    <SolidColorBrush x:Key="ControlBorder" Color="#4C566A"/>
+                    <SolidColorBrush x:Key="InputBackground" Color="#2E3440"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <CornerRadius x:Key="ControlCornerRadius">4</CornerRadius>
+            <CornerRadius x:Key="CardCornerRadius">6</CornerRadius>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.Styles>
+        <!-- Hide native title bar icon and text when extending client area -->
+        <Style Selector="WindowDrawnDecorations /template/ Image#PART_Icon">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="WindowDrawnDecorations /template/ TextBlock#PART_TitleText">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- Nordic Minimalist Stylesheet -->
+        
+        <!-- Sidebar Navigation Buttons -->
+        <Style Selector="Button.SidebarNav">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.SidebarNav:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0DFFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="Button.SidebarNav.Active">
+            <Setter Property="Foreground" Value="{DynamicResource SidebarSelectionIndicator}"/>
+        </Style>
+        <Style Selector="Button.SidebarNav.Active /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1AFFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource SidebarSelectionIndicator}"/>
+        </Style>
+
+        <!-- Standard Button Customization -->
+        <Style Selector="Button.Primary">
+            <Setter Property="Background" Value="{DynamicResource SidebarSelectionIndicator}"/>
+            <Setter Property="Foreground" Value="#2E3440"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#81A1C1"/>
+            <Setter Property="Foreground" Value="#2E3440"/>
+        </Style>
+
+        <Style Selector="Button.Secondary">
+            <Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button.Secondary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0DFFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+
+        <Style Selector="Button.Danger">
+            <Setter Property="Background" Value="#BF616A"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Button.Danger:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#A3525A"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Custom Inputs -->
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}"/>
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="MinHeight" Value="28"/>
+        </Style>
+        <Style Selector="TextBox.ReadOnly">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0,2"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+        <Style Selector="TextBox.ReadOnly:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <!-- Header Titles -->
+        <Style Selector="TextBlock.Title">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <!-- Row labels -->
+        <Style Selector="TextBlock.FormLabel">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+
+        <!-- Setting Row Cards inside Content -->
+        <Style Selector="Border.SettingRow">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+        <Style Selector="Border.SettingRow:pointerover">
+            <Setter Property="Background" Value="#05FFFFFF"/>
+        </Style>
+    </Window.Styles>
+
+    <Panel>
+        <!-- UNLOCKED STATE LAYOUT -->
+        <Grid ColumnDefinitions="60, *" IsVisible="{Binding IsUnlocked}">
+            <!-- Left Navigation Bar -->
+            <Border Grid.Column="0" 
+                    Background="{DynamicResource SidebarBackground}"
+                    BorderBrush="{DynamicResource CardBorder}" 
+                    BorderThickness="0,0,1,0">
+                <Grid RowDefinitions="48, *, Auto">
+                    <!-- Brand Logo area (Draggable) -->
+                    <Grid Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Height="48" Width="60" Background="Transparent" PointerPressed="OnPointerPressed">
+                        <PathIcon Data="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5S13.4 12 12 12s-2.5-1.1-2.5-2.5S10.6 7 12 7zm0 7c2.33 0 7 1.17 7 3.5V19H5v-1.5c0-2.33 4.67-3.5 7-3.5z" 
+                                  Width="18" Height="18"
+                                  Foreground="{DynamicResource SidebarSelectionIndicator}"/>
+                    </Grid>
+
+                    <!-- Navigation Items -->
+                    <StackPanel Grid.Row="1" Margin="0,16,0,0" Spacing="4">
+                        <!-- Home/Vault Button -->
+                        <Button Classes="SidebarNav" 
+                                Classes.Active="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding VaultPage}}"
+                                Command="{Binding NavigateToVaultCommand}"
+                                ToolTip.Tip="Vault Items">
+                            <Panel>
+                                <Border HorizontalAlignment="Left" Width="3" Height="18" CornerRadius="1.5" Background="{DynamicResource SidebarSelectionIndicator}"
+                                        IsVisible="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding VaultPage}}"/>
+                                <PathIcon Data="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" 
+                                          Width="15" Height="15"/>
+                            </Panel>
+                        </Button>
+
+                        <!-- Password Generator Button -->
+                        <Button Classes="SidebarNav" 
+                                Classes.Active="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding GeneratorPage}}"
+                                Command="{Binding NavigateToGeneratorCommand}"
+                                ToolTip.Tip="Password Generator">
+                            <Panel>
+                                <Border HorizontalAlignment="Left" Width="3" Height="18" CornerRadius="1.5" Background="{DynamicResource SidebarSelectionIndicator}"
+                                        IsVisible="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding GeneratorPage}}"/>
+                                <PathIcon Data="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" 
+                                          Width="15" Height="15"/>
+                            </Panel>
+                        </Button>
+
+                        <!-- Settings Button -->
+                        <Button Classes="SidebarNav" 
+                                Classes.Active="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding SettingsPage}}"
+                                Command="{Binding NavigateToSettingsCommand}"
+                                ToolTip.Tip="Settings">
+                            <Panel>
+                                <Border HorizontalAlignment="Left" Width="3" Height="18" CornerRadius="1.5" Background="{DynamicResource SidebarSelectionIndicator}"
+                                        IsVisible="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding SettingsPage}}"/>
+                                <PathIcon Data="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" 
+                                          Width="15" Height="15"/>
+                            </Panel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Lock Button at bottom -->
+                    <Button Grid.Row="2" Classes="SidebarNav" Command="{Binding LogoutAsync}" ToolTip.Tip="Lock Database" Margin="0,0,0,16">
+                        <PathIcon Data="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C18.43 7.91 19 9.9 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.1.57-4.09 1.59-5.42L5.17 5.17C3.8 6.97 3 9.17 3 11.5c0 4.97 4.02 9 9 9s9-4.03 9-9c0-2.33-.8-4.53-2.17-6.33z" 
+                                  Width="15" Height="15" 
+                                  Foreground="#BF616A"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Main Unlocked Page Area -->
+            <Grid Grid.Column="1" RowDefinitions="48, *">
+                <!-- Unified Content Header (Draggable) -->
+                <Grid Grid.Row="0" Background="{DynamicResource SidebarBackground}" PointerPressed="OnPointerPressed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="140"/> <!-- Space for native OS buttons on Windows -->
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="1" Text="IronVault" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" LetterSpacing="0.5"/>
+
+                    <!-- Search Bar in Header -->
+                    <TextBox Grid.Column="3" 
+                             Text="{Binding VaultPage.SearchQuery}"
+                             PlaceholderText="Search vault..." 
+                             Width="300" Height="28"
+                             Padding="8,4"
+                             FontSize="11.5"
+                             Background="{DynamicResource ContentBackground}"
+                             IsVisible="{Binding CurrentPage, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={Binding VaultPage}}"
+                             VerticalAlignment="Center">
+                        <TextBox.InnerLeftContent>
+                            <PathIcon Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" 
+                                      Width="10" Height="10" 
+                                      Margin="8,0,0,0"
+                                      Foreground="{DynamicResource TextSecondary}"/>
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                </Grid>
+
+                <!-- Page Content display -->
+                <Border Grid.Row="1" Background="{DynamicResource ContentBackground}">
+                    <Grid Margin="24,16,24,24">
+                        <ContentControl Content="{Binding CurrentPage}">
+                            <ContentControl.DataTemplates>
+                                <!-- VAULT PAGE VIEW -->
+                                <DataTemplate DataType="{x:Type vm:VaultViewModel}">
+                                    <Grid ColumnDefinitions="280, *">
+                                        <!-- Column 0: Credentials List Card -->
+                                        <Border Grid.Column="0" 
+                                                Background="{DynamicResource CardBackground}"
+                                                BorderBrush="{DynamicResource CardBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource CardCornerRadius}"
+                                                Margin="0,0,16,0">
+                                            <Grid RowDefinitions="Auto, *, Auto">
+                                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="14,12,14,8">
+                                                    <TextBlock Grid.Column="0" Text="Credentials" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                    <Button Grid.Column="1" 
+                                                            Command="{Binding AddCommand}"
+                                                            Padding="6"
+                                                            CornerRadius="4"
+                                                            Background="{DynamicResource SidebarSelectionIndicator}"
+                                                            Width="26" Height="26"
+                                                            ToolTip.Tip="Add New Credential">
+                                                        <PathIcon Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" Width="10" Height="10" Foreground="#2E3440"/>
+                                                    </Button>
+                                                </Grid>
+
+                                                <ListBox Grid.Row="1" 
+                                                         ItemsSource="{Binding FilteredItems}" 
+                                                         SelectedItem="{Binding SelectedItem}"
+                                                         Background="Transparent"
+                                                         BorderThickness="0"
+                                                         Padding="0">
+                                                    <ListBox.Styles>
+                                                        <Style Selector="ListBoxItem">
+                                                            <Setter Property="Padding" Value="14,10"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource DividerLine}"/>
+                                                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                        </Style>
+                                                        <Style Selector="ListBoxItem:last-child">
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                        </Style>
+                                                    </ListBox.Styles>
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="models:VaultItem">
+                                                            <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
+                                                                <PathIcon Grid.Column="0" 
+                                                                          Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                                                                          IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:VaultItemType.SecureNote}}"
+                                                                          Width="12" Height="12" 
+                                                                          Foreground="#8764B8"
+                                                                          VerticalAlignment="Center"/>
+                                                                <PathIcon Grid.Column="0" 
+                                                                          Data="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                                                                          IsVisible="{Binding Type, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:VaultItemType.SecureNote}}"
+                                                                          Width="12" Height="12" 
+                                                                          Foreground="{DynamicResource SidebarSelectionIndicator}"
+                                                                          VerticalAlignment="Center"/>
+                                                                
+                                                                <StackPanel Grid.Column="1" Margin="10,0,10,0" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding Title}" FontWeight="Medium" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextPrimary}"/>
+                                                                    <TextBlock Text="{Binding Username}" 
+                                                                               IsVisible="{Binding Username, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" 
+                                                                               FontSize="10" 
+                                                                               Foreground="{DynamicResource TextSecondary}" 
+                                                                               TextTrimming="CharacterEllipsis"/>
+                                                                    <TextBlock Text="Secure Note" 
+                                                                               IsVisible="{Binding Username, Converter={x:Static StringConverters.IsNullOrEmpty}}" 
+                                                                               FontSize="10" 
+                                                                               Foreground="{DynamicResource TextSecondary}" 
+                                                                               TextTrimming="CharacterEllipsis"/>
+                                                                </StackPanel>
+
+                                                                <PathIcon Grid.Column="2" 
+                                                                          Data="M1 1l4 4-4 4" 
+                                                                          Width="5" Height="8" 
+                                                                          Foreground="{DynamicResource TextSecondary}" 
+                                                                          VerticalAlignment="Center"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+
+                                                <Border Grid.Row="2" 
+                                                        BorderBrush="{DynamicResource DividerLine}" 
+                                                        BorderThickness="0,1,0,0" 
+                                                        Padding="14,8">
+                                                    <TextBlock Text="{Binding FilteredItems.Count, StringFormat='{}{0} items'}" 
+                                                               FontSize="10" 
+                                                               Foreground="{DynamicResource TextSecondary}"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Column 1: Details Pane / Editor -->
+                                        <Grid Grid.Column="1">
+                                            <!-- EMPTY STATE -->
+                                            <Border Background="{DynamicResource CardBackground}"
+                                                    BorderBrush="{DynamicResource CardBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{StaticResource CardCornerRadius}"
+                                                    IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNull}}">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                                                    <PathIcon Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" 
+                                                              Width="32" Height="32" 
+                                                              Foreground="{DynamicResource TextSecondary}"
+                                                              Opacity="0.3"/>
+                                                    <TextBlock Text="Select a credential to view details" 
+                                                               Foreground="{DynamicResource TextSecondary}" 
+                                                               FontSize="12"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- DETAILS VIEW -->
+                                            <Grid RowDefinitions="Auto, *" 
+                                                  x:CompileBindings="False">
+                                                <Grid.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="SelectedItem" Converter="{x:Static ObjectConverters.IsNotNull}"/>
+                                                        <Binding Path="!IsEditing"/>
+                                                    </MultiBinding>
+                                                </Grid.IsVisible>
+
+                                                <Border Grid.Row="0" 
+                                                        Background="{DynamicResource CardBackground}"
+                                                        BorderBrush="{DynamicResource CardBorder}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="{StaticResource CardCornerRadius}"
+                                                        Padding="16,12"
+                                                        Margin="0,0,0,12">
+                                                    <Grid ColumnDefinitions="*, Auto">
+                                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding SelectedItem.Title}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                            <TextBlock Text="{Binding SelectedItem.Type}" FontSize="10" Foreground="{DynamicResource SidebarSelectionIndicator}" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                            <Button Command="{Binding EditCommand}" Classes="Secondary" Padding="10,5" Height="28" FontSize="11">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <PathIcon Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" Width="9" Height="9"/>
+                                                                    <TextBlock Text="Edit" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                            </Button>
+                                                            <Button Command="{Binding DeleteCommand}" Classes="Danger" Padding="10,5" Height="28" FontSize="11">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" Width="9" Height="9" Foreground="White"/>
+                                                                    <TextBlock Text="Delete" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+
+                                                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                                                    <Border Background="{DynamicResource CardBackground}"
+                                                            BorderBrush="{DynamicResource CardBorder}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource CardCornerRadius}">
+                                                        <StackPanel>
+                                                            <Border Classes="SettingRow" IsVisible="{Binding SelectedItem.Username, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                                <Grid ColumnDefinitions="*, Auto">
+                                                                    <StackPanel Grid.Column="0" Spacing="2">
+                                                                        <TextBlock Text="Username" Classes="FormLabel"/>
+                                                                        <TextBox Text="{Binding SelectedItem.Username}" Classes="ReadOnly" FontSize="12.5" Foreground="{DynamicResource TextPrimary}"/>
+                                                                    </StackPanel>
+                                                                    <Button Grid.Column="1" Command="{Binding CopyUsernameCommand}" Background="Transparent" BorderThickness="0" Padding="8" CornerRadius="4">
+                                                                        <PathIcon Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" Width="12" Height="12" Foreground="{DynamicResource TextSecondary}"/>
+                                                                    </Button>
+                                                                </Grid>
+                                                            </Border>
+                                                            <Border Height="1" Background="{DynamicResource DividerLine}" IsVisible="{Binding SelectedItem.Username, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                                            <Border Classes="SettingRow" IsVisible="{Binding SelectedItem.Password, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                                <Grid ColumnDefinitions="*, Auto">
+                                                                    <StackPanel Grid.Column="0" Spacing="2">
+                                                                        <TextBlock Text="Password" Classes="FormLabel"/>
+                                                                        <TextBox PasswordChar="●" Text="{Binding SelectedItem.Password}" Classes="ReadOnly" FontSize="12.5" Foreground="{DynamicResource TextPrimary}"/>
+                                                                    </StackPanel>
+                                                                    <Button Grid.Column="1" Command="{Binding CopyPasswordCommand}" Background="Transparent" BorderThickness="0" Padding="8" CornerRadius="4">
+                                                                        <PathIcon Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" Width="12" Height="12" Foreground="{DynamicResource TextSecondary}"/>
+                                                                    </Button>
+                                                                </Grid>
+                                                            </Border>
+                                                            <Border Height="1" Background="{DynamicResource DividerLine}" IsVisible="{Binding SelectedItem.Password, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                                            <Border Classes="SettingRow" IsVisible="{Binding SelectedItem.Uri, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                                <StackPanel Spacing="2">
+                                                                    <TextBlock Text="Website URI" Classes="FormLabel"/>
+                                                                    <TextBox Text="{Binding SelectedItem.Uri}" Classes="ReadOnly" FontSize="12.5" Foreground="{DynamicResource TextPrimary}"/>
+                                                                </StackPanel>
+                                                            </Border>
+                                                            <Border Height="1" Background="{DynamicResource DividerLine}" IsVisible="{Binding SelectedItem.Uri, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                                            <Border Classes="SettingRow" IsVisible="{Binding SelectedItem.Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                                <StackPanel Spacing="2">
+                                                                    <TextBlock Text="Notes" Classes="FormLabel"/>
+                                                                    <TextBox Text="{Binding SelectedItem.Notes}" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="180" Classes="ReadOnly" FontSize="12.5" Foreground="{DynamicResource TextPrimary}"/>
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </ScrollViewer>
+                                            </Grid>
+
+                                            <!-- ITEM EDITOR -->
+                                            <Border Background="{DynamicResource CardBackground}"
+                                                    BorderBrush="{DynamicResource CardBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{StaticResource CardCornerRadius}"
+                                                    Padding="16"
+                                                    IsVisible="{Binding IsEditing}">
+                                                <Grid RowDefinitions="Auto, *">
+                                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,12">
+                                                        <TextBlock Grid.Column="0" 
+                                                                   Text="{Binding IsAddingNew, Converter={x:Static BoolConverters.Not}, ConverterParameter='Edit Credential', FallbackValue='Add Credential'}" 
+                                                                   FontSize="13.5" 
+                                                                   FontWeight="SemiBold" 
+                                                                   VerticalAlignment="Center"/>
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                                            <Button Command="{Binding SaveCommand}" Classes="Primary" Content="Save" Padding="12,5" Height="28" FontSize="11"/>
+                                                            <Button Command="{Binding CancelEditCommand}" Classes="Secondary" Content="Cancel" Padding="12,5" Height="28" FontSize="11"/>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                                                        <StackPanel Spacing="10">
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="Title" Classes="FormLabel"/>
+                                                                <TextBox Text="{Binding EditTitle}" Height="28" Padding="8,4"/>
+                                                            </StackPanel>
+
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="Type" Classes="FormLabel"/>
+                                                                <ComboBox SelectedIndex="{Binding EditType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:VaultItemType.SecureNote}}" 
+                                                                          HorizontalAlignment="Stretch" Height="28">
+                                                                    <ComboBoxItem Content="Login"/>
+                                                                    <ComboBoxItem Content="Secure Note"/>
+                                                                </ComboBox>
+                                                            </StackPanel>
+
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="Username" Classes="FormLabel"/>
+                                                                <TextBox Text="{Binding EditUsername}" Height="28" Padding="8,4"/>
+                                                            </StackPanel>
+
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="Password" Classes="FormLabel"/>
+                                                                <TextBox Text="{Binding EditPassword}" PasswordChar="●" Height="28" Padding="8,4"/>
+                                                            </StackPanel>
+
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="Website URI" Classes="FormLabel"/>
+                                                                <TextBox Text="{Binding EditUri}" Height="28" Padding="8,4"/>
+                                                            </StackPanel>
+
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="Notes" Classes="FormLabel"/>
+                                                                <TextBox Text="{Binding EditNotes}" AcceptsReturn="True" Height="70" TextWrapping="Wrap"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </ScrollViewer>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+
+                                <!-- PASSWORD GENERATOR SUBVIEW -->
+                                <DataTemplate DataType="{x:Type vm:GeneratorViewModel}">
+                                    <Grid RowDefinitions="Auto, *">
+                                        <TextBlock Grid.Row="0" Text="Generator" Classes="Title"/>
+                                        
+                                        <StackPanel Grid.Row="1" MaxWidth="520" HorizontalAlignment="Left" Spacing="12">
+                                            <Border Background="{DynamicResource CardBackground}" 
+                                                    BorderBrush="{DynamicResource CardBorder}" 
+                                                    BorderThickness="1" 
+                                                    CornerRadius="{StaticResource CardCornerRadius}" 
+                                                    Padding="16">
+                                                <Grid ColumnDefinitions="*, Auto, Auto">
+                                                    <TextBlock Grid.Column="0" 
+                                                               Text="{Binding GeneratedPassword}" 
+                                                               FontSize="14.5" 
+                                                               FontWeight="Medium" 
+                                                               FontFamily="Consolas, Courier New, monospace"
+                                                               VerticalAlignment="Center"
+                                                               TextWrapping="Wrap"/>
+                                                    <Button Grid.Column="1" Command="{Binding GenerateCommand}" Background="Transparent" BorderThickness="0" Margin="8,0,0,0" Padding="8" CornerRadius="4" ToolTip.Tip="Regenerate">
+                                                        <PathIcon Data="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z" Width="12" Height="12"/>
+                                                    </Button>
+                                                    <Button Grid.Column="2" Command="{Binding CopyCommand}" Background="Transparent" BorderThickness="0" Margin="4,0,0,0" Padding="8" CornerRadius="4" ToolTip.Tip="Copy">
+                                                        <PathIcon Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" Width="12" Height="12"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+
+                                            <Border Background="{DynamicResource CardBackground}" 
+                                                    BorderBrush="{DynamicResource CardBorder}" 
+                                                    BorderThickness="1" 
+                                                    CornerRadius="{StaticResource CardCornerRadius}">
+                                                <StackPanel>
+                                                    <Border Padding="16,12">
+                                                        <StackPanel Spacing="6">
+                                                            <Grid ColumnDefinitions="*, Auto">
+                                                                <TextBlock Grid.Column="0" Text="Length" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding Length}" FontWeight="Bold" Foreground="{DynamicResource SidebarSelectionIndicator}"/>
+                                                            </Grid>
+                                                            <Slider Minimum="8" Maximum="64" Value="{Binding Length}" SmallChange="1" LargeChange="5"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                    <Border Height="1" Background="{DynamicResource DividerLine}"/>
+
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <StackPanel Grid.Column="0" Spacing="1">
+                                                                <TextBlock Text="A-Z (Uppercase)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Include capital letters (e.g. ABC)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IncludeUppercase}" OnContent="" OffContent="" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <Border Height="1" Background="{DynamicResource DividerLine}"/>
+
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <StackPanel Grid.Column="0" Spacing="1">
+                                                                <TextBlock Text="a-z (Lowercase)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Include small letters (e.g. abc)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IncludeLowercase}" OnContent="" OffContent="" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <Border Height="1" Background="{DynamicResource DividerLine}"/>
+
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <StackPanel Grid.Column="0" Spacing="1">
+                                                                <TextBlock Text="0-9 (Numbers)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Include numeric digits (e.g. 123)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IncludeNumbers}" OnContent="" OffContent="" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <Border Height="1" Background="{DynamicResource DividerLine}"/>
+
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <StackPanel Grid.Column="0" Spacing="1">
+                                                                <TextBlock Text="Symbols" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Include special symbols (e.g. @#$)" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IncludeSymbols}" OnContent="" OffContent="" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+
+                                <!-- SETTINGS PAGE VIEW -->
+                                <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                                    <Grid RowDefinitions="Auto, *">
+                                        <TextBlock Grid.Row="0" Text="Settings" Classes="Title"/>
+                                        
+                                        <StackPanel Grid.Row="1" MaxWidth="520" HorizontalAlignment="Left" Spacing="12">
+                                            <Border Background="{DynamicResource CardBackground}" 
+                                                    BorderBrush="{DynamicResource CardBorder}" 
+                                                    BorderThickness="1" 
+                                                    CornerRadius="{StaticResource CardCornerRadius}">
+                                                <StackPanel>
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, 160">
+                                                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="Theme" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Customize the color palette of the app" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ComboBox Grid.Column="1" 
+                                                                      SelectedItem="{Binding SelectedTheme}" 
+                                                                      ItemsSource="{Binding Themes}" 
+                                                                      HorizontalAlignment="Stretch"
+                                                                      Height="28"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <Border Height="1" Background="{DynamicResource DividerLine}"/>
+
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, 160">
+                                                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="Auto-Lock Vault" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Lock the database after inactivity" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ComboBox Grid.Column="1" 
+                                                                      SelectedItem="{Binding LockTimeoutMinutes}" 
+                                                                      ItemsSource="{Binding LockTimeoutOptions}" 
+                                                                      HorizontalAlignment="Stretch"
+                                                                      Height="28"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <Border Height="1" Background="{DynamicResource DividerLine}"/>
+
+                                                    <Border Classes="SettingRow">
+                                                        <Grid ColumnDefinitions="*, 160">
+                                                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="Clear Clipboard" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Text="Delete copied credentials from OS buffer" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </StackPanel>
+                                                            <ComboBox Grid.Column="1" 
+                                                                      SelectedItem="{Binding ClearClipboardSeconds}" 
+                                                                      ItemsSource="{Binding ClearClipboardOptions}" 
+                                                                      HorizontalAlignment="Stretch"
+                                                                      Height="28"
+                                                                      VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border Background="{DynamicResource CardBackground}" 
+                                                    BorderBrush="{DynamicResource CardBorder}" 
+                                                    BorderThickness="1" 
+                                                    CornerRadius="{StaticResource CardCornerRadius}" 
+                                                    Padding="16">
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="About IronVault" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                                    
+                                                    <Grid ColumnDefinitions="120, *" Margin="0,4,0,0">
+                                                        <TextBlock Grid.Column="0" Text="Version" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding AppVersion}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource TextPrimary}"/>
+                                                    </Grid>
+                                                    
+                                                    <Grid ColumnDefinitions="120, *">
+                                                        <TextBlock Grid.Column="0" Text="Publisher" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding AppAuthor}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource TextPrimary}"/>
+                                                    </Grid>
+
+                                                    <Border Height="1" Background="{DynamicResource CardBorder}" Margin="0,4"/>
+                                                    
+                                                    <TextBlock Text="IronVault is an open source desktop Bitwarden client designed to be fast, lightweight, and compile directly to native code via .NET AOT. Licensed under GPL2." 
+                                                               FontSize="10.5" 
+                                                               LineHeight="14"
+                                                               Foreground="{DynamicResource TextSecondary}" 
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
+                        </ContentControl>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- LOCKED STATE LAYOUT -->
+        <Grid RowDefinitions="48, *" Background="{DynamicResource ContentBackground}" IsVisible="{Binding !IsUnlocked}">
+            <!-- Top Drag Handle Area when locked -->
+            <Grid Grid.Row="0" Background="Transparent" PointerPressed="OnPointerPressed"/>
+
+            <ContentControl Grid.Row="1" Content="{Binding LockPage}">
+                <ContentControl.DataTemplates>
+                    <DataTemplate DataType="{x:Type vm:LockViewModel}">
+                        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Border Background="{DynamicResource CardBackground}"
+                                    Width="340"
+                                    Padding="24,30"
+                                    CornerRadius="{StaticResource CardCornerRadius}"
+                                    BorderBrush="{DynamicResource CardBorder}"
+                                    BorderThickness="1"
+                                    BoxShadow="0 8 24 0 #1A000000">
+                                <StackPanel Spacing="14">
+                                    <PathIcon Data="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5S13.4 12 12 12s-2.5-1.1-2.5-2.5S10.6 7 12 7zm0 7c2.33 0 7 1.17 7 3.5V19H5v-1.5c0-2.33 4.67-3.5 7-3.5z" 
+                                              Width="36" Height="36"
+                                              Foreground="{DynamicResource SidebarSelectionIndicator}"
+                                              HorizontalAlignment="Center"
+                                              Margin="0,0,0,6"/>
+                                    
+                                    <TextBlock Text="Unlock Vault" 
+                                               FontSize="18" 
+                                               FontWeight="SemiBold" 
+                                               HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}"/>
+                                    
+                                    <TextBlock Text="Enter your master password to unlock and decrypt your database." 
+                                               FontSize="11.5" 
+                                               Foreground="{DynamicResource TextSecondary}" 
+                                               TextWrapping="Wrap" 
+                                               TextAlignment="Center"
+                                               Margin="0,0,0,8"/>
+
+                                    <TextBox PasswordChar="●" 
+                                             PlaceholderText="Master Password" 
+                                             Text="{Binding Password}" 
+                                             IsEnabled="{Binding !IsBusy}"
+                                             HorizontalAlignment="Stretch">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}"/>
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+
+                                    <TextBlock Text="{Binding ErrorMessage}"
+                                               Foreground="#E81123"
+                                               FontSize="11"
+                                               HorizontalAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                    <Button Classes="Primary" 
+                                            Content="Unlock" 
+                                            Command="{Binding UnlockCommand}"
+                                            HorizontalAlignment="Stretch"
+                                            Height="32"
+                                            Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ContentControl.DataTemplates>
+            </ContentControl>
+        </Grid>
+    </Panel>
 </Window>
